@@ -5,10 +5,10 @@ import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-    selector: 'app-sadmin-notifications',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-sadmin-notifications',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
     <div class="fade-in">
       <h1 style="font-size:22px;font-weight:700;margin-bottom:20px">Post Announcements 📣</h1>
       
@@ -59,45 +59,46 @@ import { AuthService } from '../../../core/services/auth.service';
   `
 })
 export class SadminNotificationsComponent implements OnInit {
-    notifForm = { title: '', message: '', targetRole: '' };
-    loading = false;
-    successMsg = false;
-    errorMsg = '';
-    sentNotifs: any[] = [];
+  notifForm = { title: '', message: '', targetRole: '' };
+  loading = false;
+  successMsg = false;
+  errorMsg = '';
+  sentNotifs: any[] = [];
 
-    constructor(private api: ApiService, private auth: AuthService) { }
+  constructor(private api: ApiService, private auth: AuthService) { }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
+    this.loadHistory();
+  }
+
+  loadHistory(): void {
+    this.api.get<any[]>('notifications').subscribe(n => {
+      // Filter manually for now or if backend supports it
+      this.sentNotifs = n.reverse().slice(0, 5);
+    });
+  }
+
+  postNotif(): void {
+    if (!this.notifForm.title || !this.notifForm.message) {
+      this.errorMsg = 'Please fill title and message.'; return;
+    }
+    this.loading = true;
+    this.errorMsg = '';
+    const payload = {
+      ...this.notifForm,
+      targetRole: this.notifForm.targetRole || null,
+      createdById: this.auth.getUser()?.userId
+    };
+
+    this.api.post('notifications', payload).subscribe({
+      next: () => {
+        this.loading = false;
+        this.successMsg = true;
+        this.notifForm = { title: '', message: '', targetRole: '' };
         this.loadHistory();
-    }
-
-    loadHistory(): void {
-        this.api.get<any[]>('notifications').subscribe(n => {
-            // Filter manually for now or if backend supports it
-            this.sentNotifs = n.reverse().slice(0, 5);
-        });
-    }
-
-    postNotif(): void {
-        if (!this.notifForm.title || !this.notifForm.message) {
-            this.errorMsg = 'Please fill title and message.'; return;
-        }
-        this.loading = true;
-        this.errorMsg = '';
-        const payload = {
-            ...this.notifForm,
-            createdById: this.auth.getUser()?.userId
-        };
-
-        this.api.post('notifications', payload).subscribe({
-            next: () => {
-                this.loading = false;
-                this.successMsg = true;
-                this.notifForm = { title: '', message: '', targetRole: '' };
-                this.loadHistory();
-                setTimeout(() => this.successMsg = false, 3000);
-            },
-            error: () => { this.loading = false; this.errorMsg = 'Failed to post.'; }
-        });
-    }
+        setTimeout(() => this.successMsg = false, 3000);
+      },
+      error: () => { this.loading = false; this.errorMsg = 'Failed to post.'; }
+    });
+  }
 }

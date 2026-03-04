@@ -23,22 +23,28 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN','ACADEMIC_MANAGER')")
     public ResponseEntity<List<UserDto>> getAllUsers(
-            @RequestParam(required = false) Role role) {
+            @RequestParam(name = "role", required = false) Role role) {
         List<UserDto> users = role != null
                 ? userService.getUsersByRole(role)
                 : userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN','ACADEMIC_MANAGER')")
+    public ResponseEntity<List<UserDto>> searchUsers(@RequestParam(name = "query") String query) {
+        return ResponseEntity.ok(userService.searchUsers(query));
+    }
+
     @GetMapping("/class/{classId}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN','ACADEMIC_MANAGER', 'TEACHER')")
-    public ResponseEntity<List<UserDto>> getStudentsByClass(@PathVariable Long classId) {
+    public ResponseEntity<List<UserDto>> getStudentsByClass(@PathVariable(name = "classId") Long classId) {
         return ResponseEntity.ok(userService.getStudentsByClassId(classId));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN','ACADEMIC_MANAGER', 'TEACHER', 'STUDENT')")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
@@ -50,13 +56,13 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN','ACADEMIC_MANAGER','TEACHER','STUDENT')")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDto dto) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable(name = "id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
@@ -64,7 +70,7 @@ public class UserController {
     @PostMapping("/{id}/reset-password")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Map<String, String>> resetPassword(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             @RequestBody Map<String, String> body) {
         userService.resetPassword(id, body.get("newPassword"));
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));

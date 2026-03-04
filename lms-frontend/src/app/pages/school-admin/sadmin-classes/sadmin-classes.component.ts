@@ -283,9 +283,11 @@ export class SadminClassesComponent implements OnInit {
     const stu = this.studentSearch.trim();
     if (!stu || !this.selectedClass) return;
 
-    // Find student by email/name first
-    this.api.get<any[]>('users', { role: 'STUDENT' }).subscribe(users => {
-      const match = users.find(u => u.email === stu || u.name === stu);
+    // Search for student using the new backend search endpoint
+    this.api.get<any[]>('users/search', { query: stu }).subscribe(results => {
+      // Find exact match or pick first if only one
+      const match = results.find(u => (u.email === stu || u.name === stu) && u.role === 'STUDENT') || (results.length === 1 && results[0].role === 'STUDENT' ? results[0] : null);
+
       if (match) {
         this.api.post(`classes/${this.selectedClass.id}/enroll/${match.id}`, { actionById: this.auth.getUser()?.userId }).subscribe({
           next: () => {

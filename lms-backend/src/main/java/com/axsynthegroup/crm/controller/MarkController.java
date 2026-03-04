@@ -2,6 +2,7 @@ package com.axsynthegroup.crm.controller;
 
 import com.axsynthegroup.crm.dto.MarkDto;
 import com.axsynthegroup.crm.service.MarkService;
+import com.axsynthegroup.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,25 +17,27 @@ import java.util.List;
 public class MarkController {
 
     private final MarkService markService;
+    private final UserService userService;
 
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<MarkDto> saveMark(
             @RequestBody MarkDto dto,
             Authentication auth) {
-        Long teacherId = (Long) ((org.springframework.security.authentication.UsernamePasswordAuthenticationToken) auth).getDetails();
+        String email = auth.getName();
+        Long teacherId = userService.getUserByEmail(email).getId();
         return ResponseEntity.ok(markService.saveMark(dto, teacherId));
     }
 
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAnyRole('TEACHER','ACADEMIC_ADMIN','ACADEMIC_MANAGER','SCHOOL_ADMIN','SUPER_ADMIN','STUDENT')")
-    public ResponseEntity<List<MarkDto>> getMarksByStudent(@PathVariable Long studentId) {
+    public ResponseEntity<List<MarkDto>> getMarksByStudent(@PathVariable(name = "studentId") Long studentId) {
         return ResponseEntity.ok(markService.getMarksByStudent(studentId));
     }
 
     @GetMapping("/task/{taskId}")
     @PreAuthorize("hasAnyRole('TEACHER','ACADEMIC_ADMIN','ACADEMIC_MANAGER','SCHOOL_ADMIN','SUPER_ADMIN')")
-    public ResponseEntity<List<MarkDto>> getMarksByTask(@PathVariable Long taskId) {
+    public ResponseEntity<List<MarkDto>> getMarksByTask(@PathVariable(name = "taskId") Long taskId) {
         return ResponseEntity.ok(markService.getMarksByTask(taskId));
     }
 }

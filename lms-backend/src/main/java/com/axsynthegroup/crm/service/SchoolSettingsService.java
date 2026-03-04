@@ -1,6 +1,8 @@
 package com.axsynthegroup.crm.service;
 
 import com.axsynthegroup.crm.model.entity.SchoolSettings;
+import com.axsynthegroup.crm.repository.ActivityLogRepository;
+import com.axsynthegroup.crm.repository.NotificationRepository;
 import com.axsynthegroup.crm.repository.SchoolSettingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class SchoolSettingsService {
 
     private final SchoolSettingsRepository repository;
+    private final ActivityLogRepository logRepository;
+    private final NotificationRepository notificationRepository;
+
+    public void resetSystemData() {
+        logRepository.deleteAll();
+        notificationRepository.deleteAll();
+    }
 
     public SchoolSettings getSettings() {
         return repository.findAll().stream().findFirst().orElseGet(this::initDefault);

@@ -25,9 +25,9 @@ public class SubjectController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Subject>> getAll(
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long teacherId,
-            @RequestParam(required = false) Long studentId) {
+            @RequestParam(name = "classId", required = false) Long classId,
+            @RequestParam(name = "teacherId", required = false) Long teacherId,
+            @RequestParam(name = "studentId", required = false) Long studentId) {
         if (classId != null)
             return ResponseEntity.ok(subjectService.getSubjectsByClass(classId));
         if (teacherId != null)
@@ -50,31 +50,35 @@ public class SubjectController {
     }
 
     private Long parseLong(Object o) {
-        if (o == null)
+        if (o == null || o.toString().isEmpty())
             return null;
         if (o instanceof Number)
             return ((Number) o).longValue();
-        return Long.valueOf(o.toString());
+        try {
+            return Long.valueOf(o.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @PostMapping("/{subjectId}/assign-teacher/{teacherId}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Map<String, String>> assignTeacher(
-            @PathVariable Long subjectId, @PathVariable Long teacherId) {
+            @PathVariable(name = "subjectId") Long subjectId, @PathVariable(name = "teacherId") Long teacherId) {
         subjectService.assignTeacher(subjectId, teacherId);
         return ResponseEntity.ok(Map.of("message", "Teacher assigned successfully"));
     }
 
     @GetMapping("/{subjectId}/tasks")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Task>> getTasks(@PathVariable Long subjectId) {
+    public ResponseEntity<List<Task>> getTasks(@PathVariable(name = "subjectId") Long subjectId) {
         return ResponseEntity.ok(subjectService.getTasksBySubject(subjectId));
     }
 
     @PostMapping("/{subjectId}/tasks")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<Task> createTask(
-            @PathVariable Long subjectId,
+            @PathVariable(name = "subjectId") Long subjectId,
             @RequestBody Map<String, Object> body) {
         Task task = subjectService.createTask(
                 subjectId,
@@ -90,7 +94,7 @@ public class SubjectController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Subject> update(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             @RequestBody Map<String, Object> body) {
         Subject s = subjectService.updateSubject(
                 id,
@@ -105,8 +109,8 @@ public class SubjectController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> delete(
-            @PathVariable Long id,
-            @RequestParam Long deletedById) {
+            @PathVariable(name = "id") Long id,
+            @RequestParam(name = "deletedById") Long deletedById) {
         subjectService.deleteSubject(id, deletedById);
         return ResponseEntity.noContent().build();
     }

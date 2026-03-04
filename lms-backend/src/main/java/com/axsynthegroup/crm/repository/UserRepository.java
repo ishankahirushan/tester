@@ -11,8 +11,13 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
+    List<User> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email);
+
     boolean existsByEmail(String email);
+
     List<User> findByRole(Role role);
+
     List<User> findByIsActive(Boolean isActive);
 
     @org.springframework.data.jpa.repository.Query("SELECT u FROM SchoolClass c JOIN c.students u WHERE c.id = :classId")

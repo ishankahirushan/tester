@@ -21,6 +21,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public List<UserDto> searchUsers(String query) {
+        return userRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query)
+                .stream().map(this::toDto).collect(Collectors.toList());
+    }
+
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
@@ -77,6 +82,11 @@ public class UserService {
         User user = findOrThrow(id);
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public UserDto getUserByEmail(String email) {
+        return toDto(userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", 0L))); // 0L as placeholder for email
     }
 
     private User findOrThrow(Long id) {

@@ -22,18 +22,18 @@ public class AttendanceController {
     @GetMapping("/class/{classId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Attendance>> getByClass(
-            @PathVariable Long classId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable(name = "classId") Long classId,
+            @RequestParam(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(attendanceService.getAttendanceByClassAndDate(classId, date));
     }
 
     @PostMapping("/class/{classId}")
     @PreAuthorize("hasAnyRole('TEACHER','SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> record(
-            @PathVariable Long classId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable(name = "classId") Long classId,
+            @RequestParam(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestBody List<Map<String, Object>> data,
-            @RequestParam Long recordedById) {
+            @RequestParam(name = "recordedById") Long recordedById) {
         attendanceService.recordAttendance(classId, date, data, recordedById);
         return ResponseEntity.ok().build();
     }

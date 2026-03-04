@@ -33,10 +33,12 @@ import { ApiService } from '../../../core/services/api.service';
             <p>No activity logs found yet.</p>
           </div>
         </ng-template>
-        <div style="margin-top:14px;display:flex;gap:10px">
+        <div style="margin-top:14px;display:flex;align-items:center;gap:15px">
           <button class="btn-outline-lms" (click)="prevPage()" [disabled]="page === 0" style="padding:7px 18px">← Previous</button>
-          <span style="display:flex;align-items:center;font-size:13px;color:#64748B">Page {{ page + 1 }}</span>
-          <button class="btn-outline-lms" (click)="nextPage()" style="padding:7px 18px">Next →</button>
+          <span style="font-size:13px;color:#64748B;font-weight:500">
+            Page {{ page + 1 }} of {{ Math.ceil(totalElements / pageSize) || 1 }}
+          </span>
+          <button class="btn-outline-lms" (click)="nextPage()" [disabled]="(page + 1) * pageSize >= totalElements" style="padding:7px 18px">Next →</button>
         </div>
       </div>
     </div>
@@ -47,6 +49,7 @@ export class SadminActivityLogsComponent implements OnInit {
   page = 0;
   pageSize = 25;
   totalElements = 0;
+  protected readonly Math = Math;
 
   constructor(private api: ApiService) { }
 

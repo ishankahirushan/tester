@@ -1,6 +1,7 @@
 package com.axsynthegroup.crm.model.entity;
 
 import com.axsynthegroup.crm.model.SectionType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,7 +12,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "classes")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class SchoolClass {
 
     @Id
@@ -30,11 +36,7 @@ public class SchoolClass {
     private User academicManager;
 
     @ManyToMany
-    @JoinTable(
-        name = "class_students",
-        joinColumns = @JoinColumn(name = "class_id"),
-        inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
+    @JoinTable(name = "class_students", joinColumns = @JoinColumn(name = "class_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
     @Builder.Default
     private List<User> students = new ArrayList<>();
 

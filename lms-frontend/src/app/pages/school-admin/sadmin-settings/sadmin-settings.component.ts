@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 
 @Component({
-    selector: 'app-sadmin-settings',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-sadmin-settings',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
     <div class="fade-in">
       <h1 style="font-size:22px;font-weight:700;margin-bottom:20px">System Settings ⚙️</h1>
       
@@ -66,37 +66,44 @@ import { ApiService } from '../../../core/services/api.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     textarea { width:100%; padding:12px; border:1px solid #E5E7F0; border-radius:10px; font-family:inherit; }
   `]
 })
 export class SadminSettingsComponent implements OnInit {
-    settings: any = {};
-    loading = false;
-    successMsg = false;
+  settings: any = {};
+  loading = false;
+  successMsg = false;
 
-    constructor(private api: ApiService) { }
+  constructor(private api: ApiService) { }
 
-    ngOnInit(): void {
-        this.api.get<any>('settings').subscribe(s => this.settings = s);
+  ngOnInit(): void {
+    this.api.get<any>('settings').subscribe(s => this.settings = s);
+  }
+
+  saveSettings(): void {
+    this.loading = true;
+    this.api.put<any>('settings', this.settings).subscribe({
+      next: (res) => {
+        this.settings = res;
+        this.loading = false;
+        this.successMsg = true;
+        setTimeout(() => this.successMsg = false, 3000);
+      },
+      error: () => { this.loading = false; alert('Failed to save settings.'); }
+    });
+  }
+
+  resetSystem(): void {
+    if (confirm('CRITICAL: This will PERMANENTLY delete all activity logs and notifications. Proceed?')) {
+      this.api.post('settings/reset-data', {}).subscribe({
+        next: () => {
+          alert('System data has been reset successfully.');
+          this.successMsg = true;
+          setTimeout(() => this.successMsg = false, 3000);
+        },
+        error: () => alert('Failed to reset system data.')
+      });
     }
-
-    saveSettings(): void {
-        this.loading = true;
-        this.api.put<any>('settings', this.settings).subscribe({
-            next: (res) => {
-                this.settings = res;
-                this.loading = false;
-                this.successMsg = true;
-                setTimeout(() => this.successMsg = false, 3000);
-            },
-            error: () => { this.loading = false; alert('Failed to save settings.'); }
-        });
-    }
-
-    resetSystem(): void {
-        if (confirm('CRITICAL: This will clear all transient data and reset the system. Proceed?')) {
-            alert('Reset functionality not yet connected to backend for safety.');
-        }
-    }
+  }
 }

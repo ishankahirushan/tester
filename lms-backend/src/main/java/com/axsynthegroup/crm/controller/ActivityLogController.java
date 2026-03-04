@@ -18,8 +18,8 @@ public class ActivityLogController {
     @GetMapping
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Page<ActivityLog>> getLogs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "25") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "25") int size) {
         return ResponseEntity.ok(activityLogService.getAllLogs(page, size));
     }
 }

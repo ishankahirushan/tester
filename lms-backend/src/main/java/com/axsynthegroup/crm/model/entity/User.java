@@ -1,6 +1,7 @@
 package com.axsynthegroup.crm.model.entity;
 
 import com.axsynthegroup.crm.model.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,7 +11,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class User {
 
     @Id
@@ -38,6 +44,7 @@ public class User {
     @Column(name = "contact_info", columnDefinition = "TEXT")
     private String contactInfo;
 
+    @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
 

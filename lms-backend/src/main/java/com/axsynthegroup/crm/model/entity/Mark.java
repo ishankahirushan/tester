@@ -1,5 +1,6 @@
 package com.axsynthegroup.crm.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,9 +11,14 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "marks", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"task_id", "student_id"})
+        @UniqueConstraint(columnNames = { "task_id", "student_id" })
 })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Mark {
 
     @Id

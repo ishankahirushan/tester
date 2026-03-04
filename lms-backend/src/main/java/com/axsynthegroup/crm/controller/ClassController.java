@@ -21,8 +21,10 @@ public class ClassController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<SchoolClass>> getAll(@RequestParam(required = false) Long managerId) {
-        if (managerId != null) return ResponseEntity.ok(classService.getClassesByManager(managerId));
+    public ResponseEntity<List<SchoolClass>> getAll(
+            @RequestParam(name = "managerId", required = false) Long managerId) {
+        if (managerId != null)
+            return ResponseEntity.ok(classService.getClassesByManager(managerId));
         return ResponseEntity.ok(classService.getAllClasses());
     }
 
@@ -32,42 +34,52 @@ public class ClassController {
         SchoolClass cls = classService.createClass(
                 body.get("name").toString(),
                 SectionType.valueOf(body.get("sectionType").toString()),
-                Long.valueOf(body.get("managerId").toString()),
-                Long.valueOf(body.get("createdById").toString())
-        );
+                parseLong(body.get("managerId")),
+                parseLong(body.get("createdById")));
         return ResponseEntity.status(HttpStatus.CREATED).body(cls);
     }
 
     @PostMapping("/{classId}/enroll/{studentId}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN')")
     public ResponseEntity<Map<String, String>> enroll(
-            @PathVariable Long classId, 
-            @PathVariable Long studentId,
-            @RequestBody Map<String, Long> body) {
-        classService.enrollStudent(classId, studentId, body.get("actionById"));
+            @PathVariable(name = "classId") Long classId,
+            @PathVariable(name = "studentId") Long studentId,
+            @RequestBody Map<String, Object> body) {
+        classService.enrollStudent(classId, studentId, parseLong(body.get("actionById")));
         return ResponseEntity.ok(Map.of("message", "Student enrolled successfully"));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<SchoolClass> update(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             @RequestBody Map<String, Object> body) {
         SchoolClass cls = classService.updateClass(
                 id,
                 body.get("name").toString(),
                 SectionType.valueOf(body.get("sectionType").toString()),
-                Long.valueOf(body.get("managerId").toString()),
-                Long.valueOf(body.get("updatedById").toString())
-        );
+                parseLong(body.get("managerId")),
+                parseLong(body.get("updatedById")));
         return ResponseEntity.ok(cls);
+    }
+
+    private Long parseLong(Object o) {
+        if (o == null || o.toString().isEmpty())
+            return null;
+        if (o instanceof Number)
+            return ((Number) o).longValue();
+        try {
+            return Long.valueOf(o.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> delete(
-            @PathVariable Long id,
-            @RequestParam Long deletedById) {
+            @PathVariable(name = "id") Long id,
+            @RequestParam(name = "deletedById") Long deletedById) {
         classService.deleteClass(id, deletedById);
         return ResponseEntity.noContent().build();
     }
@@ -75,9 +87,9 @@ public class ClassController {
     @DeleteMapping("/{classId}/remove/{studentId}")
     @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN','ACADEMIC_ADMIN')")
     public ResponseEntity<Void> removeStudent(
-            @PathVariable Long classId,
-            @PathVariable Long studentId,
-            @RequestParam Long actionById) {
+            @PathVariable(name = "classId") Long classId,
+            @PathVariable(name = "studentId") Long studentId,
+            @RequestParam(name = "actionById") Long actionById) {
         classService.removeStudent(classId, studentId, actionById);
         return ResponseEntity.noContent().build();
     }

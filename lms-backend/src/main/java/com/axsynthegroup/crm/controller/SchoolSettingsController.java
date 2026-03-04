@@ -24,4 +24,11 @@ public class SchoolSettingsController {
     public ResponseEntity<SchoolSettings> updateSettings(@RequestBody SchoolSettings settings) {
         return ResponseEntity.ok(settingsService.updateSettings(settings));
     }
+
+    @PostMapping("/reset-data")
+    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN','SUPER_ADMIN')")
+    public ResponseEntity<Void> resetData() {
+        settingsService.resetSystemData();
+        return ResponseEntity.noContent().build();
+    }
 }

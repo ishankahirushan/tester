@@ -56,7 +56,7 @@ import { ApiService } from '../../../core/services/api.service';
       <!-- Filter -->
       <div class="lms-card" style="margin-bottom:16px;padding:16px">
         <div style="display:flex;align-items:center;gap:12px">
-          <select [(ngModel)]="filterRole" (change)="loadUsers()" style="padding:8px 12px;border:1px solid #E5E7F0;border-radius:8px;font-size:14px">
+          <select [(ngModel)]="filterRole" (ngModelChange)="loadUsers()" style="padding:8px 12px;border:1px solid #E5E7F0;border-radius:8px;font-size:14px">
             <option value="">All Roles</option>
             <option value="STUDENT">Students</option>
             <option value="TEACHER">Teachers Only</option>
@@ -81,9 +81,10 @@ import { ApiService } from '../../../core/services/api.service';
               <td>
                 <button (click)="editUser(u)" class="btn-outline-lms" style="padding:4px 10px;font-size:12px;margin-right:6px">Edit</button>
                 <button (click)="resetPassword(u)" class="btn-outline-lms" style="padding:4px 10px;font-size:12px;margin-right:6px">Reset Pwd</button>
-                <button (click)="toggleActive(u)" class="btn-outline-lms" style="padding:4px 10px;font-size:12px">
+                <button (click)="toggleActive(u)" class="btn-outline-lms" style="padding:4px 10px;font-size:12px;margin-right:6px">
                   {{ u.isActive ? 'Deactivate' : 'Activate' }}
                 </button>
+                <button (click)="deleteUser(u)" class="btn-outline-lms" style="padding:4px 10px;font-size:12px;color:#DC2626;border-color:#FCA5A5">Delete</button>
               </td>
             </tr>
           </tbody>
@@ -181,6 +182,18 @@ export class SadminUsersComponent implements OnInit {
     this.api.put<any>(`users/${user.id}`, { ...user, isActive: !user.isActive }).subscribe({
       next: u => { const idx = this.users.findIndex(x => x.id === u.id); if (idx >= 0) this.users[idx] = u; },
       error: () => { }
+    });
+  }
+
+  deleteUser(user: any): void {
+    if (!confirm(`Are you sure you want to PERMANENTLY delete ${user.name}?`)) return;
+    this.api.delete(`users/${user.id}`).subscribe({
+      next: () => {
+        this.users = this.users.filter(x => x.id !== user.id);
+        this.successMsg = `User "${user.name}" deleted.`;
+        setTimeout(() => this.successMsg = '', 3000);
+      },
+      error: () => { this.errorMsg = 'Failed to delete user.'; }
     });
   }
 }

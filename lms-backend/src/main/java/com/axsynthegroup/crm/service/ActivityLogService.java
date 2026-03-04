@@ -20,6 +20,15 @@ public class ActivityLogService {
     private final UserRepository userRepository;
 
     public void log(Long userId, String action, String context) {
+        if (userId == null) {
+            ActivityLog log = ActivityLog.builder()
+                    .userName("System")
+                    .action(action)
+                    .context(context)
+                    .build();
+            activityLogRepository.save(log);
+            return;
+        }
         User user = userRepository.findById(userId).orElse(null);
         ActivityLog log = ActivityLog.builder()
                 .user(user)

@@ -1,6 +1,7 @@
 package com.axsynthegroup.crm.model.entity;
 
 import com.axsynthegroup.crm.model.TaskType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,7 +12,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tasks")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Task {
 
     @Id
@@ -37,6 +43,7 @@ public class Task {
     @Column(name = "attachments_path", columnDefinition = "TEXT")
     private String attachmentsPath;
 
+    @Builder.Default
     @Column(name = "max_marks", precision = 5, scale = 2)
     private BigDecimal maxMarks = BigDecimal.valueOf(100);
 

@@ -1,6 +1,7 @@
 package com.axsynthegroup.crm.model.entity;
 
 import com.axsynthegroup.crm.model.AttendanceStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,9 +11,14 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "attendance", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"student_id", "class_id", "date"})
+        @UniqueConstraint(columnNames = { "student_id", "class_id", "date" })
 })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Attendance {
 
     @Id
@@ -30,6 +36,7 @@ public class Attendance {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AttendanceStatus status = AttendanceStatus.PRESENT;
